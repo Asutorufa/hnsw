@@ -407,8 +407,13 @@ func (g *Graph[K]) Add(nodes ...Node[K]) {
 	}
 }
 
+type SearchResult[T cmp.Ordered] struct {
+	Node[T]
+	Distance float32
+}
+
 // Search finds the k nearest neighbors from the target node.
-func (h *Graph[K]) Search(near Vector, k int) []Node[K] {
+func (h *Graph[K]) Search(near Vector, k int) []SearchResult[K] {
 	h.assertDims(near)
 	if len(h.layers) == 0 {
 		return nil
@@ -434,10 +439,13 @@ func (h *Graph[K]) Search(near Vector, k int) []Node[K] {
 		}
 
 		nodes := searchPoint.search(k, efSearch, near, h.Distance)
-		out := make([]Node[K], 0, len(nodes))
+		out := make([]SearchResult[K], 0, len(nodes))
 
 		for _, node := range nodes {
-			out = append(out, node.node.Node)
+			out = append(out, SearchResult[K]{
+				Node:     node.node.Node,
+				Distance: node.dist,
+			})
 		}
 
 		return out
