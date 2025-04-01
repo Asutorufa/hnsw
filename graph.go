@@ -3,6 +3,7 @@ package hnsw
 import (
 	"cmp"
 	"fmt"
+	"log/slog"
 	"math"
 	"math/rand"
 	"slices"
@@ -402,7 +403,11 @@ func (g *Graph[K]) Add(nodes ...Node[K]) {
 
 		// Invariant check: the node should have been added to the graph.
 		if g.Len() != preLen+1 {
-			panic("node not added")
+			slog.Warn("node not added")
+			if len(g.layers) > 0 && g.layers[len(g.layers)-1].entry() == nil {
+				g.layers = g.layers[:len(g.layers)-1]
+				slog.Warn("append layers is empty, remove last layer")
+			}
 		}
 	}
 }
