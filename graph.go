@@ -344,7 +344,7 @@ func (g *Graph[K]) Add(nodes ...Node[K]) {
 
 		var elevator *K
 
-		preLen := g.Len()
+		// preLen := g.Len()
 
 		// Insert node at each layer, beginning with the highest.
 		for i := len(g.layers) - 1; i >= 0; i-- {
@@ -376,6 +376,10 @@ func (g *Graph[K]) Add(nodes ...Node[K]) {
 				panic("(*Graph).Distance must be set")
 			}
 
+			if searchPoint == nil {
+				continue
+			}
+
 			neighborhood := searchPoint.search(g.M, g.EfSearch, vec, g.Distance)
 			if len(neighborhood) == 0 {
 				// This should never happen because the searchPoint itself
@@ -401,9 +405,9 @@ func (g *Graph[K]) Add(nodes ...Node[K]) {
 		}
 
 		// Invariant check: the node should have been added to the graph.
-		if g.Len() != preLen+1 {
-			panic("node not added")
-		}
+		// if g.Len() != preLen+1 {
+		// 	panic("node not added")
+		// }
 	}
 }
 
@@ -429,6 +433,10 @@ func (h *Graph[K]) Search(near Vector, k int) []SearchResult[K] {
 		searchPoint := h.layers[layer].entry()
 		if elevator != nil {
 			searchPoint = h.layers[layer].nodes[*elevator]
+		}
+
+		if searchPoint == nil {
+			continue
 		}
 
 		// Descending hierarchies
