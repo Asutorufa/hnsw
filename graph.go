@@ -475,15 +475,31 @@ func (h *Graph[K]) Delete(key K) bool {
 		return false
 	}
 
+	var deleteLayer = map[int]struct{}{}
 	var deleted bool
-	for _, layer := range h.layers {
+	for i, layer := range h.layers {
 		node, ok := layer.nodes[key]
 		if !ok {
 			continue
 		}
 		delete(layer.nodes, key)
+		if len(layer.nodes) == 0 {
+			deleteLayer[i] = struct{}{}
+		}
 		node.isolate(h.M)
 		deleted = true
+	}
+
+	if len(deleteLayer) > 0 {
+		var newLayers = make([]*layer[K], 0, len(h.layers)-len(deleteLayer))
+		for i, layer := range h.layers {
+			if _, ok := deleteLayer[i]; ok {
+				continue
+			}
+			newLayers = append(newLayers, layer)
+		}
+
+		h.layers = newLayers
 	}
 
 	return deleted
